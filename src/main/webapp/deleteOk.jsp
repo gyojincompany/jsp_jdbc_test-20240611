@@ -14,7 +14,7 @@
 		String mnum = request.getParameter("memberNum");//탈퇴회원이 입력한 회원번호 가져오기
 		
 		
-		String sql = "DELETE FROM member_tbl WHERE member_num='"+mnum+"'";
+		String sql = "DELETE FROM member_tbl WHERE member_num=?";
 		
 		String driverName = "com.mysql.jdbc.Driver";
 		String url = "jdbc:mysql://localhost:3306/member_db";
@@ -22,14 +22,19 @@
 		String password = "12345";
 		
 		Connection conn = null;
-		Statement stmt = null;
+		//Statement stmt = null;
+		PreparedStatement pstmt = null;
 		
 		try {
 			Class.forName(driverName);//jdbc 드라이버 불러오기
 			conn = DriverManager.getConnection(url, username, password);//DB 연동 커넥션 생성
 			
-			stmt = conn.createStatement();
-			int success = stmt.executeUpdate(sql);//sql문 실행->1이 반환되면 sql문 실행 성공
+			//stmt = conn.createStatement();
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, mnum);
+			
+			int success = pstmt.executeUpdate();//sql문 실행->1이 반환되면 sql문 실행 성공
 			
 			if(success == 1) {//참이면 sql문 성공적으로 실행
 				out.println(mnum + "님 회원 탈퇴 성공!!");
@@ -42,8 +47,8 @@
 			e.printStackTrace();//에러발생시 에러내용 출력
 		} finally {
 			try {
-				if(stmt != null) {
-					stmt.close();
+				if(pstmt != null) {
+					pstmt.close();
 				}
 				if(conn != null) {
 					conn.close();
